@@ -1,0 +1,13 @@
+init_config:
+  default_timeout: 5
+
+instances:
+  - url: http://CAPCOM_HOST:CAPCOM_PORT
+    type: capcom_http
+    tags:
+    - capcom
+    - http
+    - custom
+    - capcom_http
+    - STACK_NAME
+    - PROJECT_ID

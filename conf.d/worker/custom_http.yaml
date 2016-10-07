@@ -1,0 +1,13 @@
+init_config:
+  default_timeout: 5
+
+instances:
+  - url: MESOS_PROTOCOL://HOST_IP:5051/state
+    type: mesos_slave_http
+    tags:
+    - mesos_slave
+    - http
+    - custom
+    - mesos_slave_http
+    - STACK_NAME
+    - PROJECT_ID

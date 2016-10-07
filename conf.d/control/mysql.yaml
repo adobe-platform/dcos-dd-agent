@@ -1,0 +1,9 @@
+init_config:
+
+instances:
+  - server: RDS_FD_INSTANCE
+    user: RDS_FD_USERNAME
+    pass: RDS_FD_PASSWORD
+    port: 3306
+    tags:
+      - dbinstanceidentifier:flight-directorREGION_SHORT_STRING
