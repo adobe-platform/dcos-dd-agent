@@ -15,7 +15,7 @@ fi
 # Determine current Ethos role:
 if [[ -z $DD_TIER ]]; then
     echo "DD_TIER environment variable not provided. Obtaining via Mesos attributes..."
-    DD_TIER=$(cat /var/lib/dcos/mesos-slave-common | grep MESOS_ATTRIBUTES=ethos_role | cut -d ":" -f 2)
+    DD_TIER=$(grep -ioP "ethos_role:\K\w+" /var/lib/dcos/mesos-slave-common)
 
     if [[ -z $DD_TIER ]]; then
         echo "Unable to determine DD_TIER. Ensure /var/lib/dcos/mesos-slave-common is set."
