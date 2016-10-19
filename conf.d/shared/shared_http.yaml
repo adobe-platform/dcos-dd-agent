@@ -2,24 +2,6 @@ init_config:
   default_timeout: 5
 
 instances:
-  - url: MESOS_PROTOCOL://MARATHON_AUTHmarathon.mesos
-    type: marathon_http
-    tags:
-    - marathon
-    - http
-    - custom
-    - marathon_http
-    - STACK_NAME
-    - PROJECT_ID
-  - url: MESOS_PROTOCOL://MESOS_HOST
-    type: mesos_master_http
-    tags:
-    - mesos_master
-    - http
-    - custom
-    - mesos_master_http
-    - STACK_NAME
-    - PROJECT_ID
   - url: MESOS_PROTOCOL://HOST_IP:5051/state
     type: mesos_slave_http
     tags:
@@ -27,23 +9,5 @@ instances:
     - http
     - custom
     - mesos_slave_http
-    - STACK_NAME
-    - PROJECT_ID
-  - url: MESOS_PROTOCOL://ZK_AUTHmarathon.mesos/exhibitor/exhibitor/v1/ui/index.html
-    type: zookeeper_http
-    tags:
-    - zookeeper
-    - http
-    - custom
-    - zookeeper_http
-    - STACK_NAME
-    - PROJECT_ID
-  - url: MESOS_PROTOCOL://chronos.marathon.mesos/
-    type: chronos_http
-    tags:
-    - chronos
-    - http
-    - custom
-    - chronos_http
     - STACK_NAME
     - PROJECT_ID
