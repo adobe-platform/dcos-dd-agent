@@ -39,6 +39,7 @@ fi
 # TAGS
 # ZK_USERNAME
 # ZK_PASSWORD
+# EXTERNAL_CHECK_NODES
 
 #fetch tags for instance
 
@@ -47,7 +48,7 @@ if [[ -z $STACK_NAME ]]; then
     echo "You must set STACK_NAME environment variable to run the Datadog Agent container"
     exit 1
 else
-   PROJECT_ID=`echo $STACK_NAME | cut -d - -f 1`-`echo $STACK_NAME | cut -d - -f 2`-`echo $STACK_NAME | cut -d - -f 3`
+   PROJECT_ID=$(echo $STACK_NAME | cut -d - -f 1`-`echo $STACK_NAME | cut -d - -f 2`-`echo $STACK_NAME | cut -d - -f 3)
    
 fi
 
@@ -148,22 +149,39 @@ if [[ $DD_TIER == "control" ]]; then
         # No MySQL DB to monitor
         echo "" > /etc/dd-agent/conf.d/mysql.yaml
     fi
-    sed -i -e "s/MESOS_PORT/${MESOS_PORT}/" /etc/dd-agent/conf.d/mesos_master.yaml
-    sed -i -e "s/MESOS_HOST/${MESOS_HOST}/" /etc/dd-agent/conf.d/mesos_master.yaml
-    sed -i -e "s/MESOS_PROTOCOL/${MESOS_PROTOCOL}/" /etc/dd-agent/conf.d/mesos_master.yaml
-    sed -i -e "s/MARATHON_PORT/${MARATHON_PORT}/" /etc/dd-agent/conf.d/marathon.yaml
-    sed -i -e "s/MESOS_HOST/${MESOS_HOST}/" /etc/dd-agent/conf.d/marathon.yaml
-    sed -i -e "s/MESOS_PROTOCOL/${MESOS_PROTOCOL}/" /etc/dd-agent/conf.d/marathon.yaml
-    if [[ $MARATHON_PASSWORD && $MARATHON_USERNAME ]]; then
-	sed -i -e "s/#  user:MARATHON_USERNAME/  user: ${MARATHON_USERNAME}/" /etc/dd-agent/conf.d/marathon.yaml
-	sed -i -e "s/#  user:MARATHON_PASSWORD/  password: ${MARATHON_USERNAME}/" /etc/dd-agent/conf.d/marathon.yaml
+
+    # configure external checks
+    # check which nodes enables external checks
+    if [[ -z $EXTERNAL_CHECK_NODES ]]; then
+	# if not set turn on all control nodes by default
+        EXTERNAL_CHECK_NODES=$HOST_IP
     fi
-    #etcd checks
-    sed -i -e "s/ETCD_HOST/${ETCD_HOST}/" /etc/dd-agent/conf.d/etcd.yaml
-    sed -i -e "s/ETCD_PORT/${ETCD_PORT}/" /etc/dd-agent/conf.d/etcd.yaml
-    #flight-director checks
-    sed -i -e "s/FD_HOST/${FD_HOST}/" /etc/dd-agent/conf.d/custom_http.yaml
-    sed -i -e "s/FD_PORT/${FD_PORT}/" /etc/dd-agent/conf.d/custom_http.yaml
+    # mesos master checks
+    for i in $EXTERNAL_CHECK_NODES; do
+	# only setup external checks on specified hosts
+	if [[ "$(dig +short ${i})" == "$(dig +short ${HOST_IP})" ]]; then
+    		sed -i -e "s/MESOS_PORT/${MESOS_PORT}/" /etc/dd-agent/conf.d/mesos_master.yaml
+    		sed -i -e "s/MESOS_HOST/${MESOS_HOST}/" /etc/dd-agent/conf.d/mesos_master.yaml
+    		sed -i -e "s/MESOS_PROTOCOL/${MESOS_PROTOCOL}/" /etc/dd-agent/conf.d/mesos_master.yaml
+    		#marathon checks
+    		sed -i -e "s/MARATHON_PORT/${MARATHON_PORT}/" /etc/dd-agent/conf.d/marathon.yaml
+    		sed -i -e "s/MESOS_HOST/${MESOS_HOST}/" /etc/dd-agent/conf.d/marathon.yaml
+    		sed -i -e "s/MESOS_PROTOCOL/${MESOS_PROTOCOL}/" /etc/dd-agent/conf.d/marathon.yaml
+    		if [[ $MARATHON_PASSWORD && $MARATHON_USERNAME ]]; then
+    		    sed -i -e "s/#  user:MARATHON_USERNAME/  user: ${MARATHON_USERNAME}/" /etc/dd-agent/conf.d/marathon.yaml
+    		    sed -i -e "s/#  user:MARATHON_PASSWORD/  password: ${MARATHON_USERNAME}/" /etc/dd-agent/conf.d/marathon.yaml
+    		fi
+    		#etcd checks
+    		sed -i -e "s/ETCD_HOST/${ETCD_HOST}/" /etc/dd-agent/conf.d/etcd.yaml
+    		sed -i -e "s/ETCD_PORT/${ETCD_PORT}/" /etc/dd-agent/conf.d/etcd.yaml
+    		#flight-director checks
+    		sed -i -e "s/FD_HOST/${FD_HOST}/" /etc/dd-agent/conf.d/custom_http.yaml
+    		sed -i -e "s/FD_PORT/${FD_PORT}/" /etc/dd-agent/conf.d/custom_http.yaml
+    		#zookeeper check
+    		sed -i -e "s/MESOS_HOST/${MESOS_HOST}/" /etc/dd-agent/conf.d/zk.yaml
+	fi
+    done
+
 elif [[ $DD_TIER == "worker" ]]; then
     echo "Configuring worker tier"
 elif [[ $DD_TIER == "proxy" ]]; then
