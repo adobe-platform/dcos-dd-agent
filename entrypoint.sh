@@ -48,7 +48,7 @@ if [[ -z $STACK_NAME ]]; then
     echo "You must set STACK_NAME environment variable to run the Datadog Agent container"
     exit 1
 else
-   PROJECT_ID=$(echo $STACK_NAME | cut -d - -f 1`-`echo $STACK_NAME | cut -d - -f 2`-`echo $STACK_NAME | cut -d - -f 3)
+   PROJECT_ID=$(echo $STACK_NAME | awk -F "-" '{print $1"-"$2}')
    
 fi
 
@@ -159,7 +159,7 @@ if [[ $DD_TIER == "control" ]]; then
     # mesos master checks
     for i in $EXTERNAL_CHECK_NODES; do
 	# only setup external checks on specified hosts
-	if [[ "$(dig +short ${i})" == "$(dig +short ${HOST_IP})" ]]; then
+	if [[ "$(/usr/bin/dig +short ${i})" == "$(/usr/bin/dig +short ${HOST_IP})" ]]; then
     		sed -i -e "s/MESOS_PORT/${MESOS_PORT}/" /etc/dd-agent/conf.d/mesos_master.yaml
     		sed -i -e "s/MESOS_HOST/${MESOS_HOST}/" /etc/dd-agent/conf.d/mesos_master.yaml
     		sed -i -e "s/MESOS_PROTOCOL/${MESOS_PROTOCOL}/" /etc/dd-agent/conf.d/mesos_master.yaml
@@ -200,6 +200,20 @@ elif [[ $DD_TIER == "proxy" ]]; then
 else
     echo "Invalid DD tier value."
     exit 1
+fi
+	
+#fluentd check runs on all agents
+REMOVE_CHECK=true
+for i in $(/usr/bin/dig +short fluentd.marathon.mesos A | /usr/bin/tr "\n" " "); do
+	if [[ "$i" == "$(dig +short ${HOST_IP})" ]]; then	
+		echo "fluentd present: adding check"
+		sed -i -e "s/HOST_IP/${HOST_IP}/" /etc/dd-agent/conf.d/fluentd.yaml	
+		REMOVE_CHECK=false
+	fi
+done
+if $REMOVE_CHECK; then
+	rm -rf /etc/dd-agent/conf.d/fluentd.yaml	
+	REMOVE_CHECK=true
 fi
 
 # Shared configs
