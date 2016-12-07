@@ -197,6 +197,8 @@ elif [[ $DD_TIER == "proxy" ]]; then
 
     sed -i -e "s/CAPCOM_HOST/${HOST_IP}/" /etc/dd-agent/conf.d/custom_http.yaml
     sed -i -e "s/CAPCOM_PORT/${CAPCOM_PORT}/" /etc/dd-agent/conf.d/custom_http.yaml
+elif [[ $DD_TIER == "public" ]]; then
+    echo "Configuring public tier"
 else
     echo "Invalid DD tier value."
     exit 1
