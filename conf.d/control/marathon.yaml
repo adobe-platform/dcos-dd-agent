@@ -1,0 +1,7 @@
+init_config:
+  default_timeout: 10
+
+instances:
+  - url: MESOS_PROTOCOL://MESOS_HOST:MARATHON_PORT
+  #  user: MARATHON_USER
+  #  password: MARATHON_PASS

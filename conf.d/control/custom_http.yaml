@@ -2,7 +2,7 @@ init_config:
   default_timeout: 5
 
 instances:
-  - url: http://HOST_IP:2001/v1/about
+  - url: http://FD_HOST:FD_PORT/v1/about
     type: flight_director_http
     tags:
     - flight_director

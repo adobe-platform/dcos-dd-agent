@@ -1,6 +1,12 @@
-FROM datadog/docker-dd-agent:11.2.584
+FROM datadog/docker-dd-agent:11.3.585
 
 MAINTAINER Ethos DevOPS <Ethos_Dev@adobe.com>
+
+#install dnsutils
+RUN apt-get update --fix-missing \
+ && apt-get install -y dnsutils \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Add the entrypoint
 COPY entrypoint.sh /entrypoint.sh

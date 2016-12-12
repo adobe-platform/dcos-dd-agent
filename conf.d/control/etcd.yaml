@@ -1,0 +1,5 @@
+init_config:
+
+instances:
+  - url: http://ETCD_HOST:ETCD_PORT
+    timeout: 5
